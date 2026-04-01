@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视觉标定板</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f0f0f0;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .controls {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-group input, .control-group select {
+      padding: 8px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .control-group input:focus, .control-group select:focus {
+      border-color: #333;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #333; }
+
+    .btn-secondary {
+      background: #fff;
+      color: #111;
+      border: 1.5px solid #ddd;
+    }
+
+    .btn-secondary:hover { background: #f5f5f5; }
+
+    .board-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+      display: inline-block;
+    }
+
+    .board-info {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .board-info span {
+      background: #f0f0f0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin: 0 4px;
+      font-weight: 600;
+    }
+
+    canvas {
+      display: block;
+      border: 2px solid #ccc;
+    }
+
+    .ruler-wrap {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .ruler-top {
+      display: flex;
+      margin-left: 24px;
+      margin-bottom: 2px;
+    }
+
+    .ruler-left {
+      display: flex;
+      flex-direction: column;
+      margin-right: 2px;
+    }
+
+    .ruler-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #999;
+      font-weight: 600;
+    }
+
+    .legend {
+      margin-top: 16px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #ccc;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .controls { display: none; }
+      .board-container {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 10px;
+      }
+      canvas { border: 1px solid #000; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <div class="control-group">
+    <label>类型</label>
+    <select id="boardType" onchange="render()">
+      <option value="checkerboard">棋盘格</option>
+      <option value="circle">圆点阵列</option>
+      <option value="asymmetric">非对称圆点</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label>列数</label>
+    <input type="number" id="cols" value="9" min="3" max="20" onchange="render()">
+  </div>
+  <div class="control-group">
+    <label>行数</label>
+    <input type="number" id="rows" value="6" min="3" max="20" onchange="render()">
+  </div>
+  <div class="control-group">
+    <label>格子大小 (px)</label>
+    <input type="number" id="cellSize" value="60" min="20" max="120" onchange="render()">
+  </div>
+  <div class="control-group">
+    <label>边距 (px)</label>
+    <input type="number" id="margin" value="30" min="0" max="80" onchange="render()">
+  </div>
+  <button class="btn btn-primary" onclick="window.print()">打印</button>
+  <button class="btn btn-secondary" onclick="downloadPNG()">下载 PNG</button>
+</div>
+
+<div class="board-container">
+  <div class="board-info" id="boardInfo"></div>
+  <canvas id="board"></canvas>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+  function getParams() {
+    return {
+      type: document.getElementById('boardType').value,
+      cols: parseInt(document.getElementById('cols').value) || 9,
+      rows: parseInt(document.getElementById('rows').value) || 6,
+      cell: parseInt(document.getElementById('cellSize').value) || 60,
+      margin: parseInt(document.getElementById('margin').value) || 30,
+    };
+  }
+
+  function render() {
+    const p = getParams();
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+
+    const W = p.cols * p.cell + p.margin * 2;
+    const H = p.rows * p.cell + p.margin * 2;
+    canvas.width = W;
+    canvas.height = H;
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    if (p.type === 'checkerboard') {
+      renderCheckerboard(ctx, p);
+    } else if (p.type === 'circle') {
+      renderCircleGrid(ctx, p);
+    } else if (p.type === 'asymmetric') {
+      renderAsymmetric(ctx, p);
+    }
+
+    updateInfo(p);
+  }
+
+  function renderCheckerboard(ctx, p) {
+    const { cols, rows, cell, margin } = p;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = margin + c * cell;
+        const y = margin + r * cell;
+        ctx.fillStyle = (r + c) % 2 === 0 ? '#000000' : '#ffffff';
+        ctx.fillRect(x, y, cell, cell);
+      }
+    }
+
+    // Border
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(margin, margin, cols * cell, rows * cell);
+
+    // Cross markers at corners
+    drawCornerMarkers(ctx, p);
+  }
+
+  function renderCircleGrid(ctx, p) {
+    const { cols, rows, cell, margin } = p;
+    const r = cell * 0.3;
+
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(margin, margin, cols * cell, rows * cell);
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const cx = margin + col * cell + cell / 2;
+        const cy = margin + row * cell + cell / 2;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#000';
+        ctx.fill();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+      }
+    }
+  }
+
+  function renderAsymmetric(ctx, p) {
+    const { cols, rows, cell, margin } = p;
+    const r = cell * 0.25;
+
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(margin, margin, cols * cell, rows * cell * 2);
+
+    const canvas = document.getElementById('board');
+    canvas.height = rows * cell * 2 + margin * 2;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeRect(margin, margin, cols * cell, rows * 2 * cell);
+
+    for (let row = 0; row < rows * 2; row++) {
+      for (let col = 0; col < cols; col++) {
+        const offset = row % 2 === 1 ? cell / 2 : 0;
+        const cx = margin + col * cell + cell / 2 + offset;
+        const cy = margin + row * cell + cell / 2;
+
+        if (cx > margin && cx < margin + cols * cell) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.fillStyle = '#000';
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawCornerMarkers(ctx, p) {
+    const { cols, rows, cell, margin } = p;
+    const positions = [
+      [margin, margin],
+      [margin + cols * cell, margin],
+      [margin, margin + rows * cell],
+      [margin + cols * cell, margin + rows * cell],
+    ];
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1.5;
+    const s = 10;
+    positions.forEach(([x, y]) => {
+      ctx.beginPath();
+      ctx.moveTo(x - s, y); ctx.lineTo(x + s, y);
+      ctx.moveTo(x, y - s); ctx.lineTo(x, y + s);
+      ctx.stroke();
+    });
+  }
+
+  function updateInfo(p) {
+    const info = document.getElementById('boardInfo');
+    const innerCols = p.type === 'checkerboard' ? p.cols - 1 : p.cols;
+    const innerRows = p.type === 'checkerboard' ? p.rows - 1 : p.rows;
+
+    info.innerHTML = `
+      <span>类型: ${p.type === 'checkerboard' ? '棋盘格' : p.type === 'circle' ? '圆点阵列' : '非对称圆点'}</span>
+      <span>格数: ${p.cols} × ${p.rows}</span>
+      <span>内角点: ${innerCols} × ${innerRows}</span>
+      <span>格子: ${p.cell}px</span>
+    `;
+  }
+
+  function downloadPNG() {
+    const canvas = document.getElementById('board');
+    const link = document.createElement('a');
+    link.download = 'calibration_board.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  render();
+</script>
+</body>
+</html>
