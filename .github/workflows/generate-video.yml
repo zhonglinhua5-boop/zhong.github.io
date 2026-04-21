@@ -52,9 +52,10 @@ jobs:
             libxdamage1 \
             libxrandr2 \
             libgbm1 \
-            libasound2t64 \
             libpango-1.0-0 \
             libcairo2
+          sudo apt-get install -y -qq libasound2t64 2>/dev/null \
+            || sudo apt-get install -y -qq libasound2
 
       - name: Install Node deps
         run: npm install
