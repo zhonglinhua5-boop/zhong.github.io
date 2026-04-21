@@ -13,6 +13,13 @@ on:
         required: false
         type: string
         default: "video"
+  push:
+    branches:
+      - main
+      - claude/initial-setup-8pUUA
+    paths:
+      - "video-gen/**"
+      - ".github/workflows/generate-video.yml"
 
 permissions:
   contents: write
