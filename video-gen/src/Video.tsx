@@ -1,3 +1,4 @@
+import React from "react";
 import { AbsoluteFill, Audio, Series, staticFile } from "remotion";
 import { z } from "zod";
 import { Scene, sceneSchema } from "./Scene";

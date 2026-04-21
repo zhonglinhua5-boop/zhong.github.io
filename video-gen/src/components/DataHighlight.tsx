@@ -1,3 +1,4 @@
+import React from "react";
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
 type Props = { value: string; label: string; color: string };

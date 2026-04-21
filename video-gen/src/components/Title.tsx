@@ -1,3 +1,4 @@
+import React from "react";
 import { spring, useCurrentFrame, useVideoConfig } from "remotion";
 
 type TitleProps = { text: string; accentColor: string };

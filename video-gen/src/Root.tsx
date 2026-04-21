@@ -1,3 +1,4 @@
+import React from "react";
 import { Composition } from "remotion";
 import { Video, videoSchema } from "./Video";
 import demoProps from "../content/demo.props.json";

@@ -1,3 +1,4 @@
+import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { z } from "zod";
 import { Background } from "./components/Background";
