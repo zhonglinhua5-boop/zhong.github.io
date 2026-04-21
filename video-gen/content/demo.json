@@ -1,0 +1,71 @@
+{
+  "voice": "en-US-AndrewMultilingualNeural",
+  "rate": "+17%",
+  "scenes": [
+    {
+      "title": "90% OF PEOPLE",
+      "subtitle": "don't know this coffee secret",
+      "caption": "Stay with me for the next 60 seconds.",
+      "narration": "Ninety percent of people drink coffee wrong. Stay with me for sixty seconds.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#1a0a2e", "#0b0f2a", "#0a1a2a"]
+    },
+    {
+      "title": "THE DATA",
+      "subtitle": "peer-reviewed studies say",
+      "highlight": { "value": "2.5x", "label": "more alertness", "color": "#FFE500" },
+      "caption": "Timing beats dosage.",
+      "narration": "Studies show timing your coffee gives two point five times more alertness than just drinking more.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#0a1a2a", "#102030", "#1a0a2e"]
+    },
+    {
+      "title": "THE MISTAKE",
+      "subtitle": "most people make it",
+      "cards": [
+        "Drinking coffee right after waking up",
+        "Cortisol is already peaked at 7 to 8 AM",
+        "Caffeine then blunts your natural energy"
+      ],
+      "caption": "Your body is already awake. You're wasting the caffeine.",
+      "narration": "Most people drink coffee right after waking. But cortisol is already peaked. You are wasting the caffeine.",
+      "accentColor": "#FF6EC7",
+      "bgGradient": ["#2a0a1e", "#1a0a2e", "#0b0f2a"]
+    },
+    {
+      "title": "THE FIX",
+      "subtitle": "backed by Stanford research",
+      "cards": [
+        "Wait 90 to 120 minutes after waking",
+        "Let cortisol drop naturally",
+        "Then caffeine boosts you for real"
+      ],
+      "caption": "Delay your first cup by 90 minutes.",
+      "narration": "Wait ninety to one hundred twenty minutes. Let cortisol drop. Then caffeine truly boosts you.",
+      "accentColor": "#4DD0E1",
+      "bgGradient": ["#0a2a2e", "#0a1a2a", "#08081a"]
+    },
+    {
+      "title": "THE RESULT",
+      "subtitle": "in one week",
+      "highlight": { "value": "+37%", "label": "focus improvement", "color": "#4DD0E1" },
+      "caption": "Users report sharper focus in days.",
+      "narration": "In one week, users report thirty seven percent sharper focus.",
+      "accentColor": "#4DD0E1",
+      "bgGradient": ["#0a1a2a", "#0a2a3a", "#102a3a"]
+    },
+    {
+      "title": "TRY IT",
+      "subtitle": "starting tomorrow",
+      "cards": [
+        "Wake up. Drink water first.",
+        "Wait 90 minutes. Then coffee.",
+        "Track how you feel for 7 days."
+      ],
+      "caption": "Follow for more science backed tips.",
+      "narration": "Try it tomorrow. Wake, hydrate, wait ninety minutes, coffee. Follow for more.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#1a0a2e", "#2a0a1e", "#08081a"]
+    }
+  ]
+}

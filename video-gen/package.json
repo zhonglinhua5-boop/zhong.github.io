@@ -1,0 +1,25 @@
+{
+  "name": "video-gen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auto-generated vertical short videos (Remotion + Edge TTS)",
+  "scripts": {
+    "prepare-content": "node scripts/prepare.mjs",
+    "render": "remotion render Main out/output.mp4 --codec=h264 --props=out/props.json",
+    "studio": "remotion studio",
+    "all": "bash scripts/render.sh"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.4.0"
+  }
+}

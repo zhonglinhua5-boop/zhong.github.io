@@ -1,0 +1,149 @@
+name: Generate Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      content_json:
+        description: "Content JSON (leave blank to use video-gen/content/demo.json)"
+        required: false
+        type: string
+        default: ""
+      filename_prefix:
+        description: "Output filename prefix (no extension)"
+        required: false
+        type: string
+        default: "video"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: video-gen
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: System deps (ffmpeg + chromium libs)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            ffmpeg \
+            libnss3 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libgbm1 \
+            libasound2t64 \
+            libpango-1.0-0 \
+            libcairo2
+
+      - name: Install Node deps
+        run: npm install
+
+      - name: Install Python deps
+        run: pip install -r tts/requirements.txt
+
+      - name: Write content JSON override
+        if: ${{ inputs.content_json != '' }}
+        shell: bash
+        env:
+          CONTENT_JSON_INPUT: ${{ inputs.content_json }}
+        run: |
+          mkdir -p content
+          printf '%s' "$CONTENT_JSON_INPUT" > content/runtime.json
+          echo "Using runtime content override:"
+          head -c 400 content/runtime.json || true
+          echo
+
+      - name: Decide content file
+        id: pick
+        shell: bash
+        run: |
+          if [ -f content/runtime.json ]; then
+            echo "content=content/runtime.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "content=content/demo.json" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute output filename
+        id: fname
+        shell: bash
+        run: |
+          TS=$(date -u +"%Y%m%d-%H%M%S")
+          PREFIX="${{ inputs.filename_prefix }}"
+          PREFIX="${PREFIX//[^a-zA-Z0-9_-]/}"
+          [ -z "$PREFIX" ] && PREFIX="video"
+          NAME="${PREFIX}-${TS}.mp4"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Render
+        env:
+          CONTENT_FILE: ${{ steps.pick.outputs.content }}
+          OUT_NAME: ${{ steps.fname.outputs.name }}
+        run: |
+          mkdir -p out
+          bash scripts/render.sh "$CONTENT_FILE" "out/$OUT_NAME"
+
+      - name: Upload as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.fname.outputs.name }}
+          path: video-gen/out/${{ steps.fname.outputs.name }}
+          retention-days: 30
+
+      - name: Publish to /videos on branch
+        env:
+          OUT_NAME: ${{ steps.fname.outputs.name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -e
+          mkdir -p videos
+          cp "video-gen/out/$OUT_NAME" "videos/$OUT_NAME"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "videos/$OUT_NAME"
+          git commit -m "video: add $OUT_NAME"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Summary
+        env:
+          OUT_NAME: ${{ steps.fname.outputs.name }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
+        run: |
+          OWNER="${REPO%%/*}"
+          NAME="${REPO##*/}"
+          PAGES_URL="https://${OWNER}.github.io/${NAME}/videos/${OUT_NAME}"
+          RAW_URL="https://raw.githubusercontent.com/${REPO}/${REF}/videos/${OUT_NAME}"
+
+          {
+            echo "## Video generated"
+            echo
+            echo "- **File**: \`videos/${OUT_NAME}\`"
+            echo "- **Branch**: \`${REF}\`"
+            echo "- **Pages URL** (if Pages is on this branch): ${PAGES_URL}"
+            echo "- **Raw URL**: ${RAW_URL}"
+            echo
+            echo "Also uploaded as workflow artifact (30 day retention)."
+          } >> "$GITHUB_STEP_SUMMARY"

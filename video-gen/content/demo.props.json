@@ -1,0 +1,69 @@
+{
+  "scenes": [
+    {
+      "title": "90% OF PEOPLE",
+      "subtitle": "don't know this coffee secret",
+      "caption": "Stay with me for the next 60 seconds.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#1a0a2e", "#0b0f2a", "#0a1a2a"],
+      "durationFrames": 120
+    },
+    {
+      "title": "THE DATA",
+      "subtitle": "peer-reviewed studies say",
+      "highlight": { "value": "2.5x", "label": "more alertness", "color": "#FFE500" },
+      "caption": "Timing beats dosage.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#0a1a2a", "#102030", "#1a0a2e"],
+      "durationFrames": 150
+    },
+    {
+      "title": "THE MISTAKE",
+      "subtitle": "most people make it",
+      "cards": [
+        "Drinking coffee right after waking up",
+        "Cortisol is already peaked at 7 to 8 AM",
+        "Caffeine then blunts your natural energy"
+      ],
+      "caption": "Your body is already awake.",
+      "accentColor": "#FF6EC7",
+      "bgGradient": ["#2a0a1e", "#1a0a2e", "#0b0f2a"],
+      "durationFrames": 240
+    },
+    {
+      "title": "THE FIX",
+      "subtitle": "backed by research",
+      "cards": [
+        "Wait 90 to 120 minutes after waking",
+        "Let cortisol drop naturally",
+        "Then caffeine boosts you for real"
+      ],
+      "caption": "Delay your first cup by 90 minutes.",
+      "accentColor": "#4DD0E1",
+      "bgGradient": ["#0a2a2e", "#0a1a2a", "#08081a"],
+      "durationFrames": 240
+    },
+    {
+      "title": "THE RESULT",
+      "subtitle": "in one week",
+      "highlight": { "value": "+37%", "label": "focus improvement", "color": "#4DD0E1" },
+      "caption": "Sharper focus in days.",
+      "accentColor": "#4DD0E1",
+      "bgGradient": ["#0a1a2a", "#0a2a3a", "#102a3a"],
+      "durationFrames": 180
+    },
+    {
+      "title": "TRY IT",
+      "subtitle": "starting tomorrow",
+      "cards": [
+        "Wake up. Drink water first.",
+        "Wait 90 minutes. Then coffee.",
+        "Track how you feel for 7 days."
+      ],
+      "caption": "Follow for more science backed tips.",
+      "accentColor": "#FFE500",
+      "bgGradient": ["#1a0a2e", "#2a0a1e", "#08081a"],
+      "durationFrames": 210
+    }
+  ]
+}
